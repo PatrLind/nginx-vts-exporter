@@ -10,6 +10,11 @@ Simple server that scrapes Nginx [vts](https://github.com/vozlt/nginx-module-vts
 
 To support time related histogram metrics, please refer to [hnlq715/nginx-prometheus-metrics](https://github.com/hnlq715/nginx-prometheus-metrics) or [#43](https://github.com/hnlq715/nginx-vts-exporter/issues/43).
 
+
+## This is a fork of the original project that is no longer maintained
+https://github.com/hnlq715/nginx-vts-exporter
+
+
 ## ANN
 
 It's hard to say that this project is **not maintained** any longer, and it is recommended to use [nginx-vtx-module](https://github.com/vozlt/nginx-module-vts) instead, which supports multiple vhost_traffic_status_display_format, like `<json|html|jsonp|prometheus>`.
