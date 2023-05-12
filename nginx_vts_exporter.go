@@ -97,6 +97,7 @@ type Upstream struct {
 		FiveXx  uint64 `json:"5xx"`
 	} `json:"responses"`
 	ResponseMsec uint64 `json:"responseMsec"`
+	ResponeMsec  uint64 `json:"responeMsec"` // There is a bug in older versions of the vts data
 	RequestMsec  uint64 `json:"requestMsec"`
 	Weight       uint64 `json:"weight"`
 	MaxFails     uint64 `json:"maxFails"`
@@ -294,7 +295,11 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	// UpstreamZones
 	for name, upstreamList := range nginxVtx.UpstreamZones {
 		for _, s := range upstreamList {
-			ch <- prometheus.MustNewConstMetric(e.upstreamMetrics["responseMsec"], prometheus.GaugeValue, float64(s.ResponseMsec), name, s.Server)
+			responseMsec := float64(s.ResponseMsec)
+			if responseMsec == 0 {
+				responseMsec = float64(s.ResponeMsec)
+			}
+			ch <- prometheus.MustNewConstMetric(e.upstreamMetrics["responseMsec"], prometheus.GaugeValue, responseMsec, name, s.Server)
 			ch <- prometheus.MustNewConstMetric(e.upstreamMetrics["requestMsec"], prometheus.GaugeValue, float64(s.RequestMsec), name, s.Server)
 
 			ch <- prometheus.MustNewConstMetric(e.upstreamMetrics["requests"], prometheus.CounterValue, float64(s.RequestCounter), name, "total", s.Server)
@@ -312,7 +317,11 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	// FilterZones
 	for filter, values := range nginxVtx.FilterZones {
 		for name, stat := range values {
-			ch <- prometheus.MustNewConstMetric(e.filterMetrics["responseMsec"], prometheus.GaugeValue, float64(stat.ResponseMsec), filter, name)
+			responseMsec := float64(stat.ResponseMsec)
+			if responseMsec == 0 {
+				responseMsec = float64(stat.ResponeMsec)
+			}
+			ch <- prometheus.MustNewConstMetric(e.filterMetrics["responseMsec"], prometheus.GaugeValue, responseMsec, filter, name)
 			ch <- prometheus.MustNewConstMetric(e.filterMetrics["requestMsec"], prometheus.GaugeValue, float64(stat.RequestMsec), filter, name)
 			ch <- prometheus.MustNewConstMetric(e.filterMetrics["requests"], prometheus.CounterValue, float64(stat.RequestCounter), filter, name, "total")
 			ch <- prometheus.MustNewConstMetric(e.filterMetrics["requests"], prometheus.CounterValue, float64(stat.Responses.OneXx), filter, name, "1xx")
